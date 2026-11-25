@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Doodle IO - Cartoon Multiplayer Drawing Game</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
+</head>
+<body>
+  <div id="app-root">
+
+    <!-- Global Floating Sound Toggle -->
+    <div class="global-header-controls">
+      <button id="btn-sound-toggle" class="icon-btn-floating" title="Toggle Sound (Mute/Unmute)">
+        <span id="sound-icon">🔊</span>
+      </button>
+    </div>
+
+    <!-- Confetti Overlay Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- ====================================================================
+         SCREEN 1: START SCREEN
+         ==================================================================== -->
+    <div id="screen-start" class="game-screen active">
+      <div class="logo-container">
+        <h1 class="bouncy-logo">
+          <span>🎨</span> DOODLE IO
+        </h1>
+        <span class="logo-badge">5 ROUNDS • 5 ARTISTS • LIVE BATTLE</span>
+      </div>
+
+      <div class="start-box cartoon-card">
+        <!-- Avatar Picker -->
+        <div class="avatar-picker-wrapper">
+          <label class="section-label">
+            <span>🎭</span> Pick Your Artist Avatar:
+          </label>
+          <div id="avatar-grid" class="avatar-grid">
+            <!-- Avatars injected via JS -->
+          </div>
+        </div>
+
+        <!-- Nickname Input -->
+        <div style="width: 100%;">
+          <label class="section-label">
+            <span>✏️</span> Your Nickname:
+          </label>
+          <div class="input-group">
+            <input type="text" id="player-nickname" class="cartoon-input" maxlength="15" placeholder="Enter Nickname..." value="DoodleMaster">
+            <button id="btn-random-name" class="btn-cartoon btn-dice" title="Randomize Nickname">🎲</button>
+          </div>
+        </div>
+
+        <!-- Start Button -->
+        <button id="btn-start-game" class="btn-cartoon btn-primary btn-large" style="width: 100%; margin-top: 10px;">
+          🚀 START GAME
+        </button>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         SCREEN 2: MATCHMAKING LOBBY
+         ==================================================================== -->
+    <div id="screen-lobby" class="game-screen">
+      <div class="lobby-card cartoon-card">
+        <h2 class="finding-title">
+          <span>🎨</span> Finding some interested artists<span class="bouncing-dots"><span>.</span><span>.</span><span>.</span></span>
+        </h2>
+        <p style="color: #636e72; font-weight: 700;">Connecting with live players worldwide</p>
+
+        <div id="lobby-roster" class="players-roster">
+          <!-- 5 player slots (User + 4 Bots) populated dynamically -->
+        </div>
+
+        <div id="lobby-status-text" style="font-weight: 800; font-size: 1.1rem; color: var(--mint-green);">
+          Looking for artists... (1/5)
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         SCREEN 3: PRE-ROUND COUNTDOWN OVERLAY
+         ==================================================================== -->
+    <div id="countdown-overlay" class="countdown-overlay">
+      <div class="countdown-card cartoon-card">
+        <div id="countdown-round-badge" class="round-pill">ROUND 1 OF 5</div>
+        <div class="topic-title-label">Your Common Object Topic:</div>
+        <div id="countdown-topic-display" class="topic-display">
+          <span id="countdown-topic-emoji">🍕</span>
+          <span id="countdown-topic-name">Pizza Slice</span>
+        </div>
+        <div id="countdown-number" class="big-countdown-number">3</div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         SCREEN 4: DRAWING ARENA
+         ==================================================================== -->
+    <div id="screen-arena" class="game-screen">
+      <div class="arena-container">
+        <!-- Top Header Bar -->
+        <div class="arena-header">
+          <div class="header-left">
+            <span class="mini-logo">DOODLE IO</span>
+            <span id="arena-round-indicator" class="round-tag">Round 1/5</span>
+          </div>
+
+          <div class="header-center">
+            <div class="topic-badge-active">
+              <span id="arena-topic-emoji">🍕</span>
+              <span id="arena-topic-name">Pizza Slice</span>
+            </div>
+            <div class="timer-container">
+              <div id="arena-timer-clock" class="timer-clock">3:00</div>
+              <div class="timer-track">
+                <div id="arena-timer-fill" class="timer-fill"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="header-right">
+            <button id="btn-done-early" class="btn-cartoon btn-success" title="Submit drawing early and fast-forward bots">
+              🏁 Done Early
+            </button>
+          </div>
+        </div>
+
+        <!-- Main Workspace -->
+        <div class="arena-body">
+          <!-- Left: Drawing Tools Panel -->
+          <div class="tools-panel">
+            <!-- Palette -->
+            <div>
+              <div class="tool-group-title">Colors</div>
+              <div id="color-palette" class="color-palette">
+                <!-- 16 color swatches injected via JS -->
+              </div>
+            </div>
+
+            <!-- Brush Sizes -->
+            <div>
+              <div class="tool-group-title">Brush Size</div>
+              <div class="brush-sizes">
+                <button class="brush-size-btn" data-size="4" title="Small (4px)">
+                  <div class="brush-circle" style="width: 6px; height: 6px;"></div>
+                </button>
+                <button class="brush-size-btn active" data-size="10" title="Medium (10px)">
+                  <div class="brush-circle" style="width: 12px; height: 12px;"></div>
+                </button>
+                <button class="brush-size-btn" data-size="20" title="Large (20px)">
+                  <div class="brush-circle" style="width: 20px; height: 20px;"></div>
+                </button>
+                <button class="brush-size-btn" data-size="36" title="XL (36px)">
+                  <div class="brush-circle" style="width: 28px; height: 28px;"></div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Actions (Eraser, Undo, Redo, Clear) -->
+            <div class="action-buttons-group">
+              <div class="tool-group-title">Tools</div>
+              <button id="btn-eraser" class="btn-cartoon btn-secondary action-btn">
+                🧼 Eraser
+              </button>
+              <div style="display: flex; gap: 6px;">
+                <button id="btn-undo" class="btn-cartoon btn-secondary action-btn" style="flex: 1;" title="Undo (Ctrl+Z)">
+                  ↩️ Undo
+                </button>
+                <button id="btn-redo" class="btn-cartoon btn-secondary action-btn" style="flex: 1;" title="Redo (Ctrl+Y)">
+                  ↪️ Redo
+                </button>
+              </div>
+              <button id="btn-clear" class="btn-cartoon btn-danger action-btn">
+                🗑️ Clear Canvas
+              </button>
+            </div>
+          </div>
+
+          <!-- Center: Drawing Canvas -->
+          <div class="canvas-wrapper">
+            <canvas id="player-canvas"></canvas>
+          </div>
+
+          <!-- Right: Simulated Competitors Preview Cards -->
+          <div class="competitors-sidebar">
+            <div class="competitors-header">Competitors 🎨</div>
+            <div id="bot-cards-container" style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- 4 bot mini-preview cards injected via JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         SCREEN 5: ROUND SCORING INTERMISSION
+         ==================================================================== -->
+    <div id="screen-intermission" class="game-screen">
+      <div class="intermission-container cartoon-card">
+        <div class="intermission-header">
+          <h2 id="intermission-round-title" class="intermission-title">Round 1 Complete!</h2>
+          <div id="intermission-topic-prompt" class="intermission-subtitle">Topic: 🍕 Pizza Slice Showcase</div>
+        </div>
+
+        <!-- 5 Artworks Gallery (User + 4 Bots) -->
+        <div id="intermission-gallery" class="gallery-showcase">
+          <!-- Injected via JS -->
+        </div>
+
+        <!-- Bottom Row: User Score Breakdown + Cumulative Leaderboard -->
+        <div class="intermission-bottom-row">
+          <div class="evaluation-box cartoon-card">
+            <div class="eval-title">
+              <span>🌟</span> Your Artwork Evaluation
+            </div>
+            <div class="eval-metric-list">
+              <div class="eval-metric-item">
+                <span>Coverage & Density:</span>
+                <span id="eval-coverage-pts" style="color: var(--mint-green);">+350 pts</span>
+              </div>
+              <div class="eval-metric-item">
+                <span>Color Variety:</span>
+                <span id="eval-color-pts" style="color: var(--sky-blue);">+200 pts</span>
+              </div>
+              <div class="eval-metric-item">
+                <span>Drawing Effort & Detail:</span>
+                <span id="eval-effort-pts" style="color: var(--orange);">+280 pts</span>
+              </div>
+              <div class="eval-metric-item" style="border-top: 2px dashed #DFE4EA; padding-top: 6px; font-size: 1.1rem; font-weight: 800;">
+                <span>Total Round Score:</span>
+                <span id="eval-total-pts" style="color: var(--coral-red);">830 pts</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="intermission-leaderboard cartoon-card">
+            <div class="lb-title">🏆 Current Leaderboard (Cumulative)</div>
+            <div id="intermission-lb-list" class="lb-list">
+              <!-- Injected via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Next Round Action -->
+        <div class="intermission-action">
+          <button id="btn-next-round" class="btn-cartoon btn-primary btn-large">
+            Next Round ➡️ (<span id="intermission-timer-badge">6</span>s)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         SCREEN 6: FINAL RESULTS & PODIUM
+         ==================================================================== -->
+    <div id="screen-podium" class="game-screen">
+      <div class="podium-screen-content">
+        <div class="final-title-container">
+          <h1 class="final-title">TOURNAMENT RESULTS</h1>
+          <p id="final-outcome-subtitle" class="final-subtitle">All 5 rounds concluded! Here are our champion artists!</p>
+        </div>
+
+        <!-- Top 3 Vertical Cartoon Towers (1st, 2nd, 3rd) -->
+        <div class="podium-towers-wrapper">
+          <!-- 2nd Place (Left) -->
+          <div class="podium-column" style="order: 1;">
+            <div class="winner-card">
+              <span style="font-size: 28px;">🥈</span>
+              <div id="podium-avatar-2" class="winner-avatar">🦊</div>
+              <div id="podium-name-2" class="winner-name">Bob Ross AI</div>
+              <div id="podium-score-2" class="winner-score">3,920 pts</div>
+            </div>
+            <div class="podium-block tower-2">
+              <span class="block-rank-number">2</span>
+            </div>
+          </div>
+
+          <!-- 1st Place (Center - Tallest) -->
+          <div class="podium-column" style="order: 2;">
+            <div class="winner-card">
+              <span class="winner-crown">👑</span>
+              <div id="podium-avatar-1" class="winner-avatar" style="width: 74px; height: 74px; font-size: 40px; border-color: var(--yellow);">🎨</div>
+              <div id="podium-name-1" class="winner-name" style="font-size: 1.25rem;">DoodleMaster</div>
+              <div id="podium-score-1" class="winner-score" style="font-size: 1.35rem;">4,450 pts</div>
+            </div>
+            <div class="podium-block tower-1">
+              <span class="block-rank-number">1</span>
+            </div>
+          </div>
+
+          <!-- 3rd Place (Right - Shorter) -->
+          <div class="podium-column" style="order: 3;">
+            <div class="winner-card">
+              <span style="font-size: 28px;">🥉</span>
+              <div id="podium-avatar-3" class="winner-avatar">🐱</div>
+              <div id="podium-name-3" class="winner-name">PicassoBot</div>
+              <div id="podium-score-3" class="winner-score">3,710 pts</div>
+            </div>
+            <div class="podium-block tower-3">
+              <span class="block-rank-number">3</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4th & 5th Place Horizontal Rows -->
+        <div class="runners-up-container">
+          <div id="runner-card-4" class="runner-card">
+            <div class="runner-left">
+              <span class="runner-rank">4th</span>
+              <span id="runner-avatar-4" class="runner-avatar">🤖</span>
+              <span id="runner-name-4" class="runner-name">Vincent Van Dough</span>
+            </div>
+            <span id="runner-score-4" class="runner-score">3,450 pts</span>
+          </div>
+
+          <div id="runner-card-5" class="runner-card">
+            <div class="runner-left">
+              <span class="runner-rank">5th</span>
+              <span id="runner-avatar-5" class="runner-avatar">👾</span>
+              <span id="runner-name-5" class="runner-name">ColorMonster</span>
+            </div>
+            <span id="runner-score-5" class="runner-score">3,120 pts</span>
+          </div>
+        </div>
+
+        <!-- Play Again Button -->
+        <button id="btn-play-again" class="btn-cartoon btn-primary btn-large">
+          🔄 PLAY AGAIN
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="audio.js"></script>
+  <script src="topics.js"></script>
+  <script src="canvas.js"></script>
+  <script src="bots.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
